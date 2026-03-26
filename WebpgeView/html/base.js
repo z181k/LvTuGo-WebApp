@@ -131,35 +131,30 @@ function initAiAssistant() {
     welcomeDiv.innerHTML = '👋 您好！我是您的智能导游<strong>小图</strong>，可以问我关于景区的历史、攻略、路线建议等问题。';
     chatHistoryDiv.appendChild(welcomeDiv);
 
-    // 发送按钮点击事件
-    sendBtn.onclick = function () {
+    // 发送消息函数
+    function sendMessage() {
         const question = aiInput.value.trim();
         if (!question) {
-            // 提示用户输入
-            const tipDiv = document.createElement('div');
-            tipDiv.className = 'ai-reply-msg';
-            tipDiv.style.color = '#ff9800';
-            tipDiv.innerHTML = '💡 请输入您想问的问题～';
-            chatHistoryDiv.appendChild(tipDiv);
-            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
-            setTimeout(() => {
-                tipDiv.remove();
-            }, 2000);
+            // 不弹窗，静默返回
             return;
         }
 
         getAiReply(question);
         aiInput.value = "";
-    };
+    }
 
-    // 回车发送
+    // 发送按钮点击事件
+    sendBtn.onclick = sendMessage;
+
+    // 回车发送 - 不弹窗
     aiInput.onkeypress = function (e) {
         if (e.key === "Enter") {
-            sendBtn.onclick();
+            e.preventDefault();  // 阻止默认行为
+            sendMessage();
         }
     };
 
-    // 清空对话按钮（可选）
+    // 清空对话按钮
     const clearBtn = document.createElement('button');
     clearBtn.innerHTML = '🗑️';
     clearBtn.title = '清空对话';
@@ -171,7 +166,11 @@ function initAiAssistant() {
         font-size: 14px;
         margin-left: 8px;
         opacity: 0.7;
+        transition: opacity 0.2s;
+        padding: 0 4px;
     `;
+    clearBtn.onmouseenter = () => clearBtn.style.opacity = '1';
+    clearBtn.onmouseleave = () => clearBtn.style.opacity = '0.7';
     clearBtn.onclick = function () {
         chatHistoryDiv.innerHTML = '';
         const welcomeDiv = document.createElement('div');
@@ -184,8 +183,8 @@ function initAiAssistant() {
     // 添加清空按钮到标题栏
     const aiHeader = document.querySelector('.ai-header');
     if (aiHeader) {
-        const statusSpan = aiHeader.querySelector('.ai-status');
-        if (statusSpan) {
+        const statusSpan = document.getElementById('aiStatus');
+        if (statusSpan && statusSpan.parentNode) {
             statusSpan.parentNode.insertBefore(clearBtn, statusSpan);
         } else {
             aiHeader.appendChild(clearBtn);
@@ -438,7 +437,7 @@ function initAiAssistant() {
     sendBtn.onclick = function() {
         const question = aiInput.value.trim();
         if (!question) {
-            alert("请输入问题");
+            //alert("请输入问题");
             return;
         }
         

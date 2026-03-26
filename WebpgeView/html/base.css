@@ -999,3 +999,38 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .leaflet-control-container .leaflet-control-attribution {
     display: none !important;
 }
+
+/* 输入框提示样式 */
+.input-tip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+    margin-bottom: 8px;
+    animation: fadeOut 1.5s ease forwards;
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    70% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-5px);
+        display: none;
+    }
+}

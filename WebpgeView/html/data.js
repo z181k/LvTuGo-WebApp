@@ -18773,7 +18773,7 @@ async function getAiReply(question) {
     // 点击发送
     sendBtn.onclick = function() {
         const question = aiInput.value.trim();
-        if (!question) return alert("请输入问题");
+
         
         // 显示用户问题
         document.getElementById("aiChatHistory").innerHTML += 
