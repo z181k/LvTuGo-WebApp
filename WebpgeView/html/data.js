@@ -656,7 +656,8 @@
         lng: 113.108451,
         lat: 39.868721,
         description: "以湿地、沙滩和休闲度假为特色的生态景区。",
-        recommend: 7
+        recommend: 7,
+        image:"https://p3-novel.byteimg.com/large/novel-static/58c5f94732a2a6bd81e35a1e469d6b9f"
     },
     {
         name: "憨山文化旅游景区",
@@ -18677,7 +18678,8 @@
   description: "民国时期典型的晋商宅院建筑。",
   recommend: "8"
 }
-        ];
+];
+
         
 // ===== DeepSeek API 核心配置 =====
 const DEEPSEEK_API_KEY = "sk-0745adefa4484d49bc14aea1c71b338b"; // 替换为真实Key
@@ -18891,73 +18893,84 @@ async function getAiReply(question) {
             });
         }
         
-        // 创建地图标记
-        function createMarker(item, index) {
-            // 标记颜色
-            let iconColor = '#1a6dcc';
-            if (item.type === '5A级景区') iconColor = '#ff6b6b';
-            else if (item.type === '4A级景区') iconColor = '#4ecdc4';
-            else iconColor = '#ffd166'; // 古建/近现代等统一用黄色
-            
-            // 自定义标记：显示景区名称
-            const customIcon = L.divIcon({
-                html: `
-                    <div class="scenic-marker" style="background:${iconColor}">
-                        <span class="marker-text">${item.name}</span>
-                    </div>
-                `,
-                className: 'custom-marker',
-                iconSize: [100, 30],
-                iconAnchor: [50, 15]
-            });
-            
-            const marker = L.marker([item.lat, item.lng], {
-                icon: customIcon,
-                title: `${item.name} - ${item.type} (推荐度: ${item.recommend}/10)`
-            });
-            
-            // 弹窗内容
-            let popupContent = `
-                <div class="custom-popup">
-                    <div class="popup-title">${item.name}</div>
-                    <div class="popup-type ${item.type === '5A级景区' ? 'type-5a' : item.type === '4A级景区' ? 'type-4a' : 'type-ancient'}">${item.type}</div>
-                    <div class="popup-address"><strong>地址:</strong> ${item.address}</div>
-            `;
-            
-            if (item.year) {
-                popupContent += `<div class="popup-year"><strong>年代:</strong> ${item.year}</div>`;
-            }
-            
-            // 添加天气信息占位符
-            popupContent += `
-                    <div class="weather-info" id="weather-${index}">
-                        <div style="margin:10px 0; text-align:center;">
-                            <div style="font-size:12px; color:#888;">正在获取天气信息...</div>
-                        </div>
-                    </div>
-                    <div class="popup-description">${item.description}</div>
-                    <div style="margin-top:10px; font-size:12px; color:#888;">推荐度: ${item.recommend}/10</div>
-                    <div class="web-search-recommend" style="margin-top:10px;" onclick="window.open('https://www.baidu.com/s?wd=${encodeURIComponent(item.name + ' ' + item.type)}', '_blank')">
-                        <div class="recommend-title">
-                            <i>🔍</i> 推荐全网搜索相关信息
-                        </div>
-                    </div>
+// 创建地图标记// 创建地图标记
+function createMarker(item, index) {
+    // 标记颜色
+    let iconColor = '#1a6dcc';
+    if (item.type === '5A级景区') iconColor = '#ff6b6b';
+    else if (item.type === '4A级景区') iconColor = '#4ecdc4';
+    else iconColor = '#ffd166';
+
+    // 自定义标记：显示景区名称
+    const customIcon = L.divIcon({
+        html: `
+            <div class="scenic-marker" style="background:${iconColor}">
+                <span class="marker-text">${item.name}</span>
+            </div>
+        `,
+        className: 'custom-marker',
+        iconSize: [100, 30],
+        iconAnchor: [50, 15]
+    });
+
+    const marker = L.marker([item.lat, item.lng], {
+        icon: customIcon,
+        title: `${item.name} - ${item.type} (推荐度: ${item.recommend}/10)`
+    });
+
+    // 构建弹窗内容
+    let popupContent = `
+        <div class="custom-popup">
+            <div class="popup-title">${item.name}</div>
+            <div class="popup-type ${item.type === '5A级景区' ? 'type-5a' : item.type === '4A级景区' ? 'type-4a' : 'type-ancient'}">${item.type}</div>
+    `;
+
+    // 如果有图片，添加图片栏
+    if (item.image && item.image.trim() !== '') {
+        popupContent += `
+            <div class="popup-image">
+                <img src="${item.image}" alt="${item.name}" onerror="this.style.display='none'">
+            </div>
+        `;
+    }
+
+    popupContent += `<div class="popup-address"><strong>地址:</strong> ${item.address}</div>`;
+
+    if (item.year) {
+        popupContent += `<div class="popup-year"><strong>年代:</strong> ${item.year}</div>`;
+    }
+
+    // 添加天气信息占位符
+    popupContent += `
+            <div class="weather-info" id="weather-${index}">
+                <div style="margin:10px 0; text-align:center;">
+                    <div style="font-size:12px; color:#888;">正在获取天气信息...</div>
                 </div>
-            `;
-            
-            marker.bindPopup(popupContent);
-            
-            // 点击标记打开弹窗并获取天气信息
-            marker.on('click', function() {
-                this.openPopup();
-                // 延迟获取天气确保弹窗加载完成
-                setTimeout(() => {
-                    fetchWeatherForPopup(item.lng, item.lat, index);
-                }, 300);
-            });
-            
-            return marker;
-        }
+            </div>
+            <div class="popup-description">${item.description}</div>
+            <div style="margin-top:10px; font-size:12px; color:#888;">推荐度: ${item.recommend}/10</div>
+            <div class="web-search-recommend" style="margin-top:10px;" onclick="window.open('https://www.baidu.com/s?wd=${encodeURIComponent(item.name + ' ' + item.type)}', '_blank')">
+                <div class="recommend-title">
+                    <span>🔍</span> 推荐全网搜索相关信息
+                </div>
+            </div>
+        </div>
+    `;
+
+    marker.bindPopup(popupContent);
+
+    // 点击标记打开弹窗并获取天气信息
+    marker.on('click', function () {
+        this.openPopup();
+        // 延迟获取天气确保弹窗加载完成
+        setTimeout(() => {
+            fetchWeatherForPopup(item.lng, item.lat, index);
+        }, 300);
+    });
+
+    return marker;
+}
+
         
         // 获取天气信息（示例接口，需替换为有效key）
         function fetchWeatherForPopup(lng, lat, index) {
@@ -19171,9 +19184,4 @@ async function getAiReply(question) {
             chatHistory.scrollTop = chatHistory.scrollHeight;
         });
         
-        // Enter键发送AI提问
-        document.getElementById('aiInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('sendAiBtn').click();
-            }
-        });
+     
